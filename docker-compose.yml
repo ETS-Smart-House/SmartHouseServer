@@ -1,0 +1,31 @@
+version: '3.1'
+
+services:
+  mysql:
+    image: mysql
+    restart: unless-stopped
+    container_name: 'MySQL'
+    environment:
+      MYSQL_ROOT_PASSWORD: smart_home
+      MYSQL_DATABASE: smart_home
+      MYSQL_USER: smart_home_user
+      MYSQL_PASSWORD: smart_home_password
+    volumes:
+      - MySQL--Data:/var/lib/mysql
+    ports:
+      - "8001:3306"
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    container_name: 'PHPMyAdmin'
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: smart_home_user
+      PMA_PASSWORD: smart_home_password
+    ports:
+      - "8002:80"
+
+volumes:
+  MySQL--Data:
+    external: true
