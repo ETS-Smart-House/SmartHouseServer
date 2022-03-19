@@ -1,5 +1,5 @@
-from datetime import date
 from datetime import datetime
+from dateutil.parser import parse
 
 temperatures = {}
 
@@ -22,8 +22,7 @@ def set_temperature_service(payload):
     if 'periods' in payload:
         temperatures[day][floor]['periods'] = payload['periods']
 
-    # - Get current time and current temperature
-    # - Send it to the heater
+    send_temperature_to_node()
 
     return temperatures[day]
 
@@ -51,11 +50,16 @@ def get_temperature_service(day, floor, time_from, time_to):
 
     periods = temperatures[day][floor]['periods']
 
-    temperature = None
-    # if period not in temperatures[day][floor]['periods']:
-    #     temperature = 0
-    # else:
-    #     temperature = temperatures[day][floor]['periods'][period]
+    temperature = 'off'
+
+    for period in periods:
+        period_from = parse(period['from'])
+        period_to = parse(period['to'])
+        requested_from = parse(time_from)
+        requested_to = parse(time_to)
+        if requested_from >= period_from and requested_to <= period_to:
+            temperature = period['value']
+            break
 
     return {
         'mode': mode,
@@ -66,6 +70,30 @@ def get_temperature_service(day, floor, time_from, time_to):
 def get_current_temperature(floor):
     now = datetime.now()  # time object
 
-    date = str(now.date())
+    day = str(now.date())
 
-    bool = True
+    if day not in temperatures or floor not in temperatures[day]:
+        return 'off'
+
+    if temperatures[day][floor]['mode'] == 'auto':
+        return temperatures[day][floor]['value']
+
+    periods = temperatures[day][floor]['periods']
+
+    for period in periods:
+        period_from = parse(period['from'])
+        period_to = parse(period['to'])
+        if period_from <= now <= period_to:
+            return period['value']
+
+def send_temperature_to_node():
+    floor = '0'
+    temperature = get_current_temperature(floor)
+    command_string = f'{floor}-{temperature}'
+    # @TODO
+
+    floor = '1'
+    temperature = get_current_temperature(floor)
+    command_string = f'{floor}-{temperature}'
+
+    # @TODO

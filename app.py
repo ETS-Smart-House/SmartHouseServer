@@ -1,8 +1,11 @@
 from flask import Flask, request
 
 from services.lights import set_lights_service, get_lights_service
-from services.temperature import get_temperature_service, set_temperature_service, get_current_temperature
+from services.temperature import get_temperature_service, set_temperature_service, get_current_temperature, \
+    send_temperature_to_node
 from threading import Timer
+
+TIMER_INTERVAL = 60 * 5  # 60s * 5
 
 app = Flask(__name__)
 
@@ -69,14 +72,9 @@ def set_temperature():
     return temperature
 
 
-def sendTemperatureToNode():
-    temperature = get_current_temperature('0')
-    # Send to Node
-
-    temperature = get_current_temperature('1')
-    # Send to Node
-
-    Timer(1, sendTemperatureToNode).start()
+def get_temperature_interval():
+    send_temperature_to_node()
+    Timer(TIMER_INTERVAL, get_temperature_interval).start()
 
 
-# Timer(1, sendTemperatureToNode).start()  # after 30 seconds, "hello, world" will be printed
+Timer(TIMER_INTERVAL, get_temperature_interval).start()  # after 30 seconds, "hello, world" will be printed
