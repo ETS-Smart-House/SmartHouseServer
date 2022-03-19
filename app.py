@@ -1,4 +1,7 @@
 from flask import Flask, request
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from flask import jsonify
 
 from services.lights import set_lights_service, get_lights_service
 from services.temperature import get_temperature_service, set_temperature_service, get_current_temperature, \
@@ -9,12 +12,27 @@ TIMER_INTERVAL = 60 * 5  # 60s * 5
 
 app = Flask(__name__)
 
+engine = create_engine(
+    '{dialect}+{driver}://{user}:{password}@{host}:{port}/{database}'.format(
+        dialect='mysql',
+        driver='pymysql',
+        user='smart_home_user',
+        password='smart_home_password',
+        host='localhost',
+        port=8001,
+        database='smart_home'
+    )
+)
+
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
+
 
 @app.get("/light")
 def get_lights():
-    lights = get_lights_service()
+    lights = get_lights_service(session)
 
-    return lights
+    return jsonify(lights)
 
 
 @app.post('/light')
@@ -25,9 +43,9 @@ def set_lights():
     if 'value' not in body:
         raise Exception()
 
-    lights = set_lights_service(body)
+    lights = set_lights_service(body, session)
 
-    return lights
+    return jsonify(lights)
 
 
 @app.get('/temperature')
