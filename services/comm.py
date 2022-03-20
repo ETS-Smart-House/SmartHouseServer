@@ -1,5 +1,5 @@
 import time
-from serial import Serial
+from serial
 from services.temperature import get_current_temperature
 
 
