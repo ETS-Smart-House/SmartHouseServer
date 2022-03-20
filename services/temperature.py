@@ -105,4 +105,5 @@ def send_temperature_to_node():
     temperature = response['temperature']
     command_string = f'{floor}-{mode}-{temperature}'
 
+
     # @TODO
