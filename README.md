@@ -1,6 +1,10 @@
+## Requirements
+- Docker
+
 ## Installation instructions
 ```
 pip3 install -r requirements.txt
+docker-compose up -d
 ```
 
 ## To run the app

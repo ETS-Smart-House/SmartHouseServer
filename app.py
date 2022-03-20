@@ -12,14 +12,14 @@ TIMER_INTERVAL = 60 * 5  # 60s * 5
 app = Flask(__name__)
 
 
-@app.get("/light")
+@app.route("/light", methods=['GET'])
 def get_lights():
     lights = get_lights_service(session)
 
     return jsonify(lights)
 
 
-@app.post('/light')
+@app.route("/light", methods=['POST'])
 def set_lights():
     body = request.get_json()
     if 'id' not in body:
@@ -32,7 +32,7 @@ def set_lights():
     return jsonify(lights)
 
 
-@app.get('/temperature')
+@app.route('/temperature', methods=['GET'])
 def get_temperature():
     args = request.args
     day = args.get('day')
@@ -52,7 +52,7 @@ def get_temperature():
     return temperature
 
 
-@app.post('/temperature')
+@app.route('/temperature', methods=['POST'])
 def set_temperature():
     body = request.get_json()
 
