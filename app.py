@@ -1,31 +1,15 @@
 from flask import Flask, request
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from flask import jsonify
 
 from services.lights import set_lights_service, get_lights_service
 from services.temperature import get_temperature_service, set_temperature_service, get_current_temperature, \
     send_temperature_to_node
 from threading import Timer
+from db.connection import session
 
 TIMER_INTERVAL = 60 * 5  # 60s * 5
 
 app = Flask(__name__)
-
-engine = create_engine(
-    '{dialect}+{driver}://{user}:{password}@{host}:{port}/{database}'.format(
-        dialect='mysql',
-        driver='pymysql',
-        user='smart_home_user',
-        password='smart_home_password',
-        host='localhost',
-        port=8001,
-        database='smart_home'
-    )
-)
-
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
 
 
 @app.get("/light")
@@ -43,7 +27,7 @@ def set_lights():
     if 'value' not in body:
         raise Exception()
 
-    lights = set_lights_service(body, session)
+    lights = set_lights_service(session, body)
 
     return jsonify(lights)
 
@@ -59,15 +43,11 @@ def get_temperature():
     if floor not in ['0', '1']:
         raise Exception('Value `floor` is missing or wrong')
 
-    time_from = args.get('time_from')
-    if not time_from:
+    time = args.get('time')
+    if not time:
         raise Exception('Query parameter `time_from` is missing')
 
-    time_to = args.get('time_to')
-    if not time_to:
-        raise Exception('Query parameter `time_to` is missing')
-
-    temperature = get_temperature_service(day, floor, time_from, time_to)
+    temperature = get_temperature_service(session, day, floor, time)
 
     return temperature
 
@@ -85,7 +65,7 @@ def set_temperature():
     if 'floor' not in body or (str(body['floor']) not in ['0', '1']):
         raise Exception('Value `floor` is missing or wrong')
 
-    temperature = set_temperature_service(body)
+    temperature = set_temperature_service(session, body)
 
     return temperature
 

@@ -1,99 +1,108 @@
 from datetime import datetime
 from dateutil.parser import parse
+from db.connection import session
+from db.models.temperature import Temperature, TemperaturePeriod
 
 temperatures = {}
 
 
-def set_temperature_service(payload):
-    day = payload['day']
-    floor = str(payload['floor'])
+def set_temperature_service(session, payload):
+    day = parse(payload['day']).date()
+    floor = int(payload['floor'])
 
-    if day not in temperatures:
-        temperatures[day] = {}
-    if floor not in temperatures[day]:
-        temperatures[day][floor] = {}
+    temperature_entry = session.query(Temperature).filter_by(day=day).one_or_none()
+    if not temperature_entry:
+        temperature_entry = Temperature()
+        temperature_entry.day = day
+        temperature_entry.floor = floor
 
     if 'mode' in payload:
-        temperatures[day][floor]['mode'] = payload['mode']
+        temperature_entry.mode = payload['mode']
 
     if 'value' in payload:
-        temperatures[day][floor]['auto_value'] = payload['value']
+        temperature_entry.value = payload['value']
+
+    session.add(temperature_entry)
+    session.commit()
+
+    session.query(TemperaturePeriod).filter_by(day=temperature_entry.day).delete()
 
     if 'periods' in payload:
-        temperatures[day][floor]['periods'] = payload['periods']
+        for period in payload['periods']:
+            period_entry = TemperaturePeriod()
+            period_entry.day = temperature_entry.day
+            period_entry.time_from = parse(period['from']).time()
+            period_entry.time_to = parse(period['to']).time()
+            period_entry.value = float(period['value'])
+            session.add(period_entry)
+
+    session.commit()
 
     send_temperature_to_node()
 
-    return temperatures[day]
+    return temperature_entry.to_dict()
 
 
-def get_temperature_service(day, floor, time_from, time_to):
-    if day not in temperatures:
-        raise Exception(f'Day {day} not configured')
+def get_temperature_service(session, day, floor, time):
+    try:
+        day = parse(day).date()
+    except:
+        None
+    try:
+        time = parse(time).time()
+    except:
+        None
 
-    if floor not in temperatures[day]:
-        raise Exception(f'Floor {floor} not configured for day {day} not configured')
+    temperature_entry = session.query(Temperature).filter_by(day=day).one_or_none()
+    if not temperature_entry:
+        return {
+            'mode': 'off',
+            'temperature': 'off'
+        }
 
-    mode = temperatures[day][floor]['mode']
+    mode = temperature_entry.mode
 
     # Auto
     if mode == 'auto':
-        temperature = temperatures[day][floor]['auto_value']
         return {
             'mode': mode,
-            'temperature': temperature
+            'temperature': temperature_entry.value
         }
 
-    # Periodical
-    if 'periods' not in temperatures[day][floor]:
-        raise Exception(f'No periods configured for day {day}')
+    query = session.query(TemperaturePeriod) \
+        .filter_by(day=day) \
+        .filter(time >= TemperaturePeriod.time_from) \
+        .filter(time < TemperaturePeriod.time_to)
 
-    periods = temperatures[day][floor]['periods']
-
-    temperature = 'off'
-
-    for period in periods:
-        period_from = parse(period['from'])
-        period_to = parse(period['to'])
-        requested_from = parse(time_from)
-        requested_to = parse(time_to)
-        if requested_from >= period_from and requested_to <= period_to:
-            temperature = period['value']
-            break
+    temperature = query.one_or_none()
 
     return {
         'mode': mode,
-        'temperature': temperature
+        'temperature': temperature.value if temperature is not None else 'off'
     }
 
 
 def get_current_temperature(floor):
     now = datetime.now()  # time object
 
-    day = str(now.date())
+    day = now.date()
+    time = now.time()
 
-    if day not in temperatures or floor not in temperatures[day]:
-        return 'off'
+    return get_temperature_service(session, day, floor, time)
 
-    if temperatures[day][floor]['mode'] == 'auto':
-        return temperatures[day][floor]['value']
-
-    periods = temperatures[day][floor]['periods']
-
-    for period in periods:
-        period_from = parse(period['from'])
-        period_to = parse(period['to'])
-        if period_from <= now <= period_to:
-            return period['value']
 
 def send_temperature_to_node():
     floor = '0'
-    temperature = get_current_temperature(floor)
-    command_string = f'{floor}-{temperature}'
+    response = get_current_temperature(floor)
+    mode = response['mode']
+    temperature = response['temperature']
+    command_string = f'{floor}-{mode}-{temperature}'
     # @TODO
 
     floor = '1'
-    temperature = get_current_temperature(floor)
-    command_string = f'{floor}-{temperature}'
+    response = get_current_temperature(floor)
+    mode = response['mode']
+    temperature = response['temperature']
+    command_string = f'{floor}-{mode}-{temperature}'
 
     # @TODO

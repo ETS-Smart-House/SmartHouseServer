@@ -2,7 +2,7 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, String, Integer
 from sqlalchemy_serializer import SerializerMixin
 
-Base = declarative_base()
+from db.connection import Base
 
 
 class Light(Base, SerializerMixin):

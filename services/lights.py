@@ -1,7 +1,7 @@
-from models.light import Light
+from db.models.light import Light
 
 
-def set_lights_service(payload, session):
+def set_lights_service(session, payload):
     room, value = payload['id'], int(payload['value'])
     light = Light(room=room, value=value)
 
