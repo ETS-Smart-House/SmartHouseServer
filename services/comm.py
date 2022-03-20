@@ -12,4 +12,5 @@ def sendCom(command, pin, inputvalue, port="/dev/ttyUSB0", baudrate=115200, time
 def inputCom(port="/dev/ttyUSB0", baudrate=115200, timeout=0.1)
   arduino = serial.Serial(port, baudrate, timeout)
   data = arduino.readline()
+  
   return data
