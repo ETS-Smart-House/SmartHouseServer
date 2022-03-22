@@ -1,5 +1,5 @@
 from db.models.light import Light
-import comm.py
+from . import comm
 
 def set_lights_service(session, payload):
     room, value = payload['room'], int(payload['value'])
