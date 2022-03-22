@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   mysql:
-    image: hypriot/rpi-mysql
+    image: mysql
     restart: unless-stopped
     container_name: 'MySQL'
     environment:
@@ -25,13 +25,6 @@ services:
       PMA_PASSWORD: smart_home_password
     ports:
       - "8011:80"
-
-  client:
-    build: ./docker/client
-    restart: unless-stopped
-    container_name: 'Client'
-    ports:
-      - "8013:80"
 volumes:
   MySQL--Data:
     external: true

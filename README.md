@@ -12,12 +12,12 @@ $ docker-compose up -d
 To check if all services are running open:
 
 - `http://localhost:8011` to see PHPMyAdmin
-- `http://localhost:8013` to see the Client app
 
 ## To run the app
 
 ```bash
 $ export PYTHONPATH=$PWD:$PYTHONPATH
+$ python3 db/init.py
 $ flask run --host=0.0.0.0 --port=8012
 ```
 Then open `http://localhost:8013` and start using the App
