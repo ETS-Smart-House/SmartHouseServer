@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Date, Float, ForeignKey, DateTime, String, Time
+from sqlalchemy import Column, Integer, Date, Float, ForeignKey, String, Time
 from sqlalchemy.orm import relationship
 from sqlalchemy_serializer import SerializerMixin
 from db.connection import Base
@@ -28,3 +28,5 @@ class Temperature(Base, SerializerMixin):
     mode = Column(String(6))
     value = Column(Float)
     periods = relationship(TemperaturePeriod)
+
+

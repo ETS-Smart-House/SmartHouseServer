@@ -8,7 +8,7 @@ engine = create_engine(
         user='smart_home_user',
         password='smart_home_password',
         host='localhost',
-        port=8001,
+        port=8010,
         database='smart_home'
     ), echo=True
 )

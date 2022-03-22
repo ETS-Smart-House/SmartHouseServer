@@ -13,7 +13,7 @@ services:
     volumes:
       - MySQL--Data:/var/lib/mysql
     ports:
-      - "8001:3306"
+      - "8010:3306"
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -24,8 +24,14 @@ services:
       PMA_USER: smart_home_user
       PMA_PASSWORD: smart_home_password
     ports:
-      - "8002:80"
+      - "8011:80"
 
+  client:
+    build: ./docker/client
+    restart: unless-stopped
+    container_name: 'Client'
+    ports:
+      - "8013:80"
 volumes:
   MySQL--Data:
     external: true

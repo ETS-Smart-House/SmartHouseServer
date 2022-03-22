@@ -4,3 +4,4 @@ sqlalchemy
 pymysql
 SQLAlchemy-serializer
 pyserial
+flask_cors

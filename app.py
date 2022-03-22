@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask import jsonify
-
+from flask_cors import CORS
 from services.lights import set_lights_service, get_lights_service
 from services.temperature import get_temperature_service, set_temperature_service, get_current_temperature, \
     send_temperature_to_node
@@ -10,6 +10,7 @@ from db.connection import session
 TIMER_INTERVAL = 60 * 5  # 60s * 5
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route("/light", methods=['GET'])
@@ -22,7 +23,7 @@ def get_lights():
 @app.route("/light", methods=['POST'])
 def set_lights():
     body = request.get_json()
-    if 'id' not in body:
+    if 'room' not in body:
         raise Exception()
     if 'value' not in body:
         raise Exception()
