@@ -17,3 +17,12 @@ def set_measurement_service(session, temperature, humidity, location):
     session.commit()
 
     return measurement
+
+# def get_measurement_service(session, time, location):
+#     """
+#
+#     :param session:
+#     :param time: either a day or a from:to format
+#     :param location:
+#     :return:
+#     """
