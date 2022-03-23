@@ -26,6 +26,13 @@
 
 #define DTPIN0 13
 
+#define USTRIGPIN0 22
+#define USECHOPIN0 23
+
+bool switchin = true;
+float usTemp1 = 0.0;
+float usTemp2 = 0.0;
+
 OneWire oneWire0(DTPIN0);
 DallasTemperature dTSens0(&oneWire0);
 
@@ -36,9 +43,9 @@ DHT dht0(DHTPIN0, DHTTYPE);
 DHT dht1(DHTPIN1, DHTTYPE);
 DHT dht2(DHTPIN2, DHTTYPE);
 
-int tempTime = millis();
+unsigned long tempTime = millis();
 
-char comInput[] = "O-0-0";
+char comInput[64] = "O-0-0";
 
 void StringParse(char* str)
 {
@@ -68,26 +75,26 @@ void StringParse(char* str)
   {
     case 0:
       LightControll(atoi(sID), atoi(sIN));
-      Serial.print("LIGHTS ");
+      Serial.print("\nLIGHTS ");
       Serial.print(sID);
       Serial.print(" ");
       Serial.println(sIN);
       break;
     case 1:
       HeaterRelay(atoi(sID), atoi(sIN));
-      Serial.print("HEAT ");
+      Serial.print("\nHEAT ");
       Serial.print(sID);
       Serial.print(" ");
       Serial.println(sIN);
       break;
     case 2:
-      Serial.print("PUMP ");
+      Serial.print("\nPUMP ");
       Serial.print(sID);
       Serial.print(" ");
       Serial.println(sIN);
       break;
     case 3:
-      Serial.println("ERROR PARSING");
+      Serial.println("\nERROR PARSING");
       break;
       
   }
@@ -110,14 +117,8 @@ void ServoControll(Servo servo, bool state)
 
 void LightControll(int pin, int perc)
 {
-  int i = 0;
-  int ontime = perc;
-  int offtime = 100 - perc;
-  for(int i = 0; i < offtime; i++)
-    digitalWrite(pin, LOW);
-  for(int i = 0; i < ontime; i++)
-    digitalWrite(pin, HIGH);
-
+  int output = map(perc, 0, 100, 0, 255);
+  analogWrite(pin, output);
 }
 
 void HeaterRelay(int pin, bool state)
@@ -164,6 +165,14 @@ void DTRead(DallasTemperature dTSens, int ID)
     Serial.print(tOut);
 }
 
+float UsControll(int echoPin)
+{
+  float pulse, output;
+  pulse = pulseIn(echoPin, HIGH);
+  output = 0.017 * pulse;
+  return output;
+}
+
 void setup() 
 {
   pinMode(LPIN0, OUTPUT);
@@ -173,6 +182,9 @@ void setup()
   pinMode(LPIN4, OUTPUT);
 
   pinMode(HPIN0, OUTPUT);
+
+  pinMode(USTRIGPIN0, OUTPUT);
+  pinMode(USECHOPIN0, INPUT);  
 
   servo0.attach(PPIN0);
   servo1.attach(PPIN1);
@@ -191,6 +203,21 @@ void loop()
     strcpy(comInput, Serial.readString().c_str());
     StringParse(comInput);
   }
+  digitalWrite(USTRIGPIN0, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(USTRIGPIN0, LOW);
+  usTemp1 = UsControll(USECHOPIN0);
+  if(switchin)
+  {
+    usTemp2 = usTemp1;
+  }
+  else
+  {
+    if((usTemp2+usTemp1)<20)
+      digitalWrite(LPIN0, HIGH);
+  }
+  switchin = !switchin;
+  
   if(millis() - tempTime > 10000)
   {
     DHTRead(dht0, 0);
@@ -198,6 +225,8 @@ void loop()
     DHTRead(dht2, 2);
 
     DTRead(dTSens0, 0);
+
+    digitalWrite(LPIN0, LOW);
     
     tempTime = millis();
   }
