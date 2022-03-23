@@ -1,5 +1,6 @@
 from db.models.light import Light
-from . import comm
+from services.comm import send_command
+
 
 def set_lights_service(session, payload):
     room, value = payload['room'], int(payload['value'])
@@ -30,7 +31,6 @@ def get_lights_service(session):
 
 
 def send_light_to_node(room, value):
-    command_string = f'{room}-{value}'
     pin = 0
     if room == "stairs":
         pin = 2
