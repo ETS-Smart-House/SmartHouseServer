@@ -1,5 +1,6 @@
 from db.models.light import Light
 from services.comm import send_command
+from services.comm import input_command
 
 lights = {}
 
@@ -18,7 +19,6 @@ def get_lights_service():
 
 
 def send_light_to_node(room, value):
-    pin = 0
     if room == "stairs":
         pin = 2
     elif room == "room1":
@@ -29,7 +29,5 @@ def send_light_to_node(room, value):
         pin = 5
     elif room == "bathroom":
         pin = 6
-
     send_command("L", pin, value)
-
-    # @TODO
+    print(input_command())
