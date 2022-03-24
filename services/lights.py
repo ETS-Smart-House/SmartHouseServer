@@ -33,6 +33,5 @@ def send_light_to_node(room, value):
     elif room == "bathroom":
         pin = 6
     send_command("L", pin, value)
-    print(input_command())
-    time.sleep(1)
-    request_mesurment(0, 0)
+    time.sleep(5)
+    request_mesurment(0)

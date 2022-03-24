@@ -1,14 +1,20 @@
 from sqlalchemy import func
 
 from db.models.measurements import Measurement
+from db.connection import session
 from services.comm import send_command
 from services.comm import input_command
 
-def request_mesurment(ID, mode=0):
-    send_command("RS", ID,  mode)
+def request_mesurment(ID):
+    send_command("RS", ID, 0)
     in_string = input_command().decode('utf-8')
     print(in_string)
-
+    s_list = in_string.split("-")
+    print(s_list)
+    if s_list[1] == '0':
+    	set_measurement_service(session, s_list[3], s_list[2], 'outdoor')
+    else: 
+    	set_measurement_service(session, s_list[3], s_list[2], 'indoor')
 
 def set_measurement_service(session, temperature, humidity, location):
     """
