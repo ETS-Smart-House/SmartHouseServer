@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from db.models.measurements import Measurement
 
 
@@ -18,11 +20,15 @@ def set_measurement_service(session, temperature, humidity, location):
 
     return measurement
 
-# def get_measurement_service(session, time, location):
-#     """
-#
-#     :param session:
-#     :param time: either a day or a from:to format
-#     :param location:
-#     :return:
-#     """
+
+def get_measurement_service(session, location):
+    results = session.query(Measurement) \
+        .filter_by(location=location) \
+        .with_entities(func.date(Measurement.time).label('date'),
+                       func.round(func.avg(Measurement.temperature), 0).label('temperature'),
+                       func.round(func.avg(Measurement.humidity), 0).label('humidity')) \
+        .group_by(func.date(Measurement.time)).all()
+
+    return list(
+        map(lambda result: {'date': str(result.date), 'temperature': result.temperature, 'humidity': result.humidity},
+            results))

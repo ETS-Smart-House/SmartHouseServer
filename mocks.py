@@ -1,5 +1,4 @@
 import random
-from datetime import datetime
 from datetime import timedelta
 from random import uniform
 from dateutil.parser import parse
@@ -10,22 +9,23 @@ from db.models.temperature import Temperature, TemperaturePeriod
 
 
 def mock_measurements():
-    start_date = parse('2022-03-21T00:00:00Z')
+    start_date = parse('2022-03-01T00:00:00Z')
 
     dates = []
-    for day_add in range(0, 60):
-        d = start_date + timedelta(days=day_add)
-        for minute_add in range(0, 288):
-            m = d + timedelta(minutes=minute_add)
-            dates.append(m)
-            measurement = Measurement()
-            measurement.temperature = round(uniform(0, 35))
-            measurement.humidity = round(uniform(0, 35))
-            measurement.location = 'indoor'
-            measurement.time = m
-            session.add(measurement)
+    for location in ['indoor', 'outdoor']:
+        for day_add in range(0, 60):
+            d = start_date + timedelta(days=day_add)
+            for minute_add in range(0, 288):
+                m = d + timedelta(minutes=minute_add)
+                dates.append(m)
+                measurement = Measurement()
+                measurement.temperature = round(uniform(0, 35))
+                measurement.humidity = round(uniform(0, 35))
+                measurement.location = location
+                measurement.time = m
+                session.add(measurement)
 
-    session.commit()
+        session.commit()
 
 
 def mock_temperatures():
@@ -55,5 +55,5 @@ def mock_temperatures():
             session.commit()
 
 
-# mock_measurements()
+mock_measurements()
 mock_temperatures()
