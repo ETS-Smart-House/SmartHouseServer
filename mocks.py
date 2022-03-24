@@ -12,7 +12,7 @@ def mock_measurements():
     start_date = parse('2022-03-01T00:00:00Z')
 
     dates = []
-    for location in ['indoor', 'outdoor']:
+    for location in ['floor1', 'floor2', 'outdoor']:
         for day_add in range(0, 60):
             d = start_date + timedelta(days=day_add)
             for minute_add in range(0, 288):

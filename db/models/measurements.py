@@ -15,6 +15,6 @@ class Measurement(Base, SerializerMixin):
     # set the structure of table:
     id = Column(Integer, primary_key=True)
     time = Column(DateTime, default=datetime.utcnow)
-    location = Column(Enum('indoor', 'outdoor'))
+    location = Column(Enum('floor1', 'floor2', 'outdoor'))
     temperature = Column(Float)
     humidity = Column(Float)
