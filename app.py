@@ -1,16 +1,15 @@
+from threading import Timer
+from time import sleep
+
 from flask import Flask, request
 from flask import jsonify
 from flask_cors import CORS
-from services.lights import set_lights_service, get_lights_service
-from services.measurements import get_measurement_service, request_mesurment, get_latest_measurement
-from services.temperature import get_temperature_service, set_temperature_service, manage_temperature, \
-    get_current_temperature, \
-    send_temperature_to_node
-from threading import Timer
-from db.connection import session
-from services.measurements import request_mesurment
 
-from time import sleep
+from db.connection import session
+from services.lights import set_lights_service, get_lights_service
+from services.measurements import get_measurement_service, get_latest_measurement
+from services.measurements import request_mesurment
+from services.temperature import get_temperature_service, set_temperature_service, manage_temperature
 
 TIMER_INTERVAL = 60 * 2.5  # 60s * 5
 
