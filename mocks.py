@@ -13,7 +13,7 @@ def mock_measurements():
     start_date = parse('2022-03-21T00:00:00Z')
 
     dates = []
-    for day_add in range(0, 20):
+    for day_add in range(0, 60):
         d = start_date + timedelta(days=day_add)
         for minute_add in range(0, 288):
             m = d + timedelta(minutes=minute_add)
@@ -31,7 +31,7 @@ def mock_measurements():
 def mock_temperatures():
     start_date = parse('2022-03-21T00:00:00Z')
     for floor in range(0, 2):
-        for day_add in range(0, 20):
+        for day_add in range(0, 60):
             d = start_date + timedelta(days=day_add)
 
             temperature = Temperature()

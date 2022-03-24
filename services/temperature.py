@@ -52,7 +52,8 @@ def get_temperature_service(session, day):
     if not temperature_entries:
         return {
             'mode': 'off',
-            'temperature': 'off'
+            'temperature': 'off',
+            'periods': []
         }
 
     return list(map(lambda temperature_entry: temperature_entry.to_dict(), temperature_entries))
