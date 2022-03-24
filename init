@@ -1,2 +1,4 @@
 export PYTHONPATH=$PWD:$PYTHONPATH;
 python3 db/init.py
+
+python3 mocks.py

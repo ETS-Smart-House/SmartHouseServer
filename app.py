@@ -40,40 +40,15 @@ def get_temperature():
     if not day:
         raise Exception('Query parameter `day` is missing')
 
-    floor = str(args.get('floor'))
-    if floor not in ['0', '1']:
-        raise Exception('Value `floor` is missing or wrong')
+    temperature = get_temperature_service(session, day)
 
-    time = args.get('time')
-    if not time:
-        raise Exception('Query parameter `time_from` is missing')
-
-    temperature = get_temperature_service(session, day, floor, time)
-
-    return temperature
+    return jsonify(temperature)
 
 
 @app.route('/temperature', methods=['POST'])
 def set_temperature():
     body = request.get_json()
 
-    if 'day' not in body:
-        raise Exception('Value `day` is missing')
-
-    if 'mode' not in body or (body['mode'] not in ['auto', 'manual']):
-        raise Exception('Value `mode` is missing or wrong')
-
-    if 'floor' not in body or (str(body['floor']) not in ['0', '1']):
-        raise Exception('Value `floor` is missing or wrong')
-
     temperature = set_temperature_service(session, body)
 
-    return temperature
-
-
-def get_temperature_interval():
-    send_temperature_to_node()
-    Timer(TIMER_INTERVAL, get_temperature_interval).start()
-
-
-Timer(TIMER_INTERVAL, get_temperature_interval).start()  # after 30 seconds, "hello, world" will be printed
+    return jsonify(temperature)
