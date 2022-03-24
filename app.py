@@ -3,12 +3,13 @@ from flask import jsonify
 from flask_cors import CORS
 from services.lights import set_lights_service, get_lights_service
 from services.measurements import get_measurement_service, request_mesurment, get_latest_measurement
-from services.temperature import get_temperature_service, set_temperature_service, get_current_temperature, \
+from services.temperature import get_temperature_service, set_temperature_service, manage_temperature, get_current_temperature, \
     send_temperature_to_node
 from threading import Timer
 from db.connection import session
+from services.measurements import request_mesurment
 
-
+from time import sleep
 
 TIMER_INTERVAL = 60 * 5  # 60s * 5
 
@@ -81,3 +82,15 @@ def get_latest_measurements():
     measurements = get_latest_measurement(session, location)
 
     return jsonify(measurements)
+"""
+	CODE FOR TIMER (2.5 min)
+	
+	request_mesurment(0)
+	sleep(0.1)
+	request_mesurment(1)
+	sleep(0.1)
+	request_mesurment(2)
+	sleep(0.1)		
+	manage_temperature()
+	
+"""

@@ -5,7 +5,7 @@ Heating : command = "H" pin=9 inputvalue=1/0 Output: "H-9-0"
 Light: command = "L" pin=2 inputvalue=1-100 Output: "L-2-45"
 Pump: command="P" pin=12 inputvalue=1/0 Output: "P-12-1"
 '''
-arduino = serial.Serial(port="/dev/ttyUSB1", baudrate=115200)
+arduino = serial.Serial(port="/dev/ttyUSB0", baudrate=115200)
 
 
 def send_command(command, pin, inputvalue, port="/dev/ttyUSB0", baudrate=115200):

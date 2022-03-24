@@ -1,9 +1,10 @@
 from db.models.light import Light
 from services.comm import send_command
 from services.comm import input_command
+from db.connection import session
 
-from services.measurements import request_mesurment
-import time
+from services.temperature import manage_temperature
+
 
 lights = {}
 
@@ -33,5 +34,4 @@ def send_light_to_node(room, value):
     elif room == "bathroom":
         pin = 6
     send_command("L", pin, value)
-    time.sleep(5)
-    request_mesurment(0)
+    
