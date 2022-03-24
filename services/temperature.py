@@ -3,83 +3,59 @@ from dateutil.parser import parse
 from db.connection import session
 from db.models.temperature import Temperature, TemperaturePeriod
 
-temperatures = {}
-
 
 def set_temperature_service(session, payload):
-    day = parse(payload['day']).date()
-    floor = int(payload['floor'])
+    response = []
+    for item in payload:
+        if ('day' not in item) or ('floor' not in item) or ('mode' not in item) or ('value' not in item):
+            continue
 
-    temperature_entry = session.query(Temperature).filter_by(day=day).one_or_none()
-    if not temperature_entry:
-        temperature_entry = Temperature()
-        temperature_entry.day = day
-        temperature_entry.floor = floor
+        day = parse(item['day']).date()
+        floor = int(item['floor'])
+        mode = item['mode']
+        value = item['value']
 
-    if 'mode' in payload:
-        temperature_entry.mode = payload['mode']
+        temperature_entry = session.query(Temperature).filter_by(floor=floor).filter_by(day=day).one_or_none()
+        if not temperature_entry:
+            temperature_entry = Temperature()
+            temperature_entry.day = day
+            temperature_entry.floor = floor
+        temperature_entry.mode = mode
+        temperature_entry.value = value
 
-    if 'value' in payload:
-        temperature_entry.value = payload['value']
+        session.add(temperature_entry)
+        session.commit()
 
-    session.add(temperature_entry)
-    session.commit()
+        session.query(TemperaturePeriod).filter_by(parent=temperature_entry.id).delete()
 
-    session.query(TemperaturePeriod).filter_by(day=temperature_entry.day).delete()
+        if 'periods' in item:
+            for period in item['periods']:
+                period_entry = TemperaturePeriod()
+                period_entry.parent = temperature_entry.id
+                period_entry.time_from = parse(period['time_from']).time()
+                period_entry.time_to = parse(period['time_to']).time()
+                period_entry.value = period['value']
+                session.add(period_entry)
 
-    if 'periods' in payload:
-        for period in payload['periods']:
-            period_entry = TemperaturePeriod()
-            period_entry.day = temperature_entry.day
-            period_entry.time_from = parse(period['from']).time()
-            period_entry.time_to = parse(period['to']).time()
-            period_entry.value = float(period['value'])
-            session.add(period_entry)
-
-    session.commit()
+            session.commit()
+        response.append(temperature_entry.to_dict())
 
     send_temperature_to_node()
 
-    return temperature_entry.to_dict()
+    return response
 
 
-def get_temperature_service(session, day, floor, time):
-    try:
-        day = parse(day).date()
-    except:
-        None
-    try:
-        time = parse(time).time()
-    except:
-        None
+def get_temperature_service(session, day):
+    day = parse(day).date()
 
-    temperature_entry = session.query(Temperature).filter_by(day=day).one_or_none()
-    if not temperature_entry:
+    temperature_entries = session.query(Temperature).filter_by(day=day).all()
+    if not temperature_entries:
         return {
             'mode': 'off',
             'temperature': 'off'
         }
 
-    mode = temperature_entry.mode
-
-    # Auto
-    if mode == 'auto':
-        return {
-            'mode': mode,
-            'temperature': temperature_entry.value
-        }
-
-    query = session.query(TemperaturePeriod) \
-        .filter_by(day=day) \
-        .filter(time >= TemperaturePeriod.time_from) \
-        .filter(time < TemperaturePeriod.time_to)
-
-    temperature = query.one_or_none()
-
-    return {
-        'mode': mode,
-        'temperature': temperature.value if temperature is not None else 'off'
-    }
+    return list(map(lambda temperature_entry: temperature_entry.to_dict(), temperature_entries))
 
 
 def get_current_temperature(floor):
@@ -88,21 +64,30 @@ def get_current_temperature(floor):
     day = now.date()
     time = now.time()
 
-    return get_temperature_service(session, day, floor, time)
+    temperature_entry = session.query(Temperature).filter_by(floor=floor).filter_by(day=day).one_or_none()
+    if not temperature_entry:
+        return None
+
+    period = session.query(TemperaturePeriod) \
+        .filter_by(parent=temperature_entry.id) \
+        .filter(time > TemperaturePeriod.time_from) \
+        .filter(time < TemperaturePeriod.time_to) \
+        .one_or_none()
+
+    if not period:
+        return None
+
+    return temperature_entry.mode, period.value
 
 
 def send_temperature_to_node():
     floor = '0'
-    response = get_current_temperature(floor)
-    mode = response['mode']
-    temperature = response['temperature']
+    mode, temperature = get_current_temperature(floor)
     command_string = f'{floor}-{mode}-{temperature}'
     # @TODO
 
     floor = '1'
-    response = get_current_temperature(floor)
-    mode = response['mode']
-    temperature = response['temperature']
+    mode, temperature = get_current_temperature(floor)
     command_string = f'{floor}-{mode}-{temperature}'
 
     # @TODO

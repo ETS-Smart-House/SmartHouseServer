@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Date, Float, ForeignKey, String, Time
+from sqlalchemy import Column, Integer, Date, Integer, ForeignKey, String, Time
 from sqlalchemy.orm import relationship
 from sqlalchemy_serializer import SerializerMixin
 from db.connection import Base
@@ -9,11 +9,11 @@ class TemperaturePeriod(Base, SerializerMixin):
 
     serialize_only = ('time_from', 'time_to', 'value')
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, )
     time_from = Column(Time)
     time_to = Column(Time)
-    value = Column(Float)
-    day = Column(Date, ForeignKey('temperature.day'))
+    value = Column(Integer)
+    parent = Column(Integer, ForeignKey('temperature.id'))
 
 
 class Temperature(Base, SerializerMixin):
@@ -23,10 +23,9 @@ class Temperature(Base, SerializerMixin):
     serialize_only = ('day', 'floor', 'mode', 'value', 'periods')
 
     # set the structure of table:
-    day = Column(Date, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    day = Column(Date)
     floor = Column(Integer)
     mode = Column(String(6))
-    value = Column(Float)
+    value = Column(Integer)
     periods = relationship(TemperaturePeriod)
-
-

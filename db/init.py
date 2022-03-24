@@ -5,4 +5,5 @@ from db.models.light import Light
 from db.models.temperature import Temperature, TemperaturePeriod
 from db.models.measurements import Measurement
 
+Base.metadata.drop_all(engine)
 Base.metadata.create_all(engine)
