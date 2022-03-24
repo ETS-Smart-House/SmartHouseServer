@@ -10,7 +10,7 @@ class Measurement(Base, SerializerMixin):
     # set the name of table:
     __tablename__ = 'measurements'
 
-    serialize_only = ('id', 'value', 'time')
+    serialize_only = ('time', 'location', 'temperature', 'humidity')
 
     # set the structure of table:
     id = Column(Integer, primary_key=True)

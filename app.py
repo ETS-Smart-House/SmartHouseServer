@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask import jsonify
 from flask_cors import CORS
 from services.lights import set_lights_service, get_lights_service
-from services.measurements import get_measurement_service, request_mesurment
+from services.measurements import get_measurement_service, request_mesurment, get_latest_measurement
 from services.temperature import get_temperature_service, set_temperature_service, get_current_temperature, \
     send_temperature_to_node
 from threading import Timer
@@ -69,4 +69,15 @@ def get_measurements():
 
     return jsonify(measurements)
 
-    
+
+@app.route('/latest-measurement', methods=['GET'])
+def get_latest_measurements():
+    args = request.args
+
+    location = args.get('location')
+    if not location:
+        raise Exception('Query parameter `location` is missing')
+
+    measurements = get_latest_measurement(session, location)
+
+    return jsonify(measurements)

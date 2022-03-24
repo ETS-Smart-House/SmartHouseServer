@@ -5,6 +5,7 @@ from db.connection import session
 from services.comm import send_command
 from services.comm import input_command
 
+
 def request_mesurment(ID):
     send_command("RS", ID, 0)
     in_string = input_command().decode('utf-8')
@@ -12,9 +13,10 @@ def request_mesurment(ID):
     s_list = in_string.split("-")
     print(s_list)
     if s_list[1] == '0':
-    	set_measurement_service(session, s_list[3], s_list[2], 'outdoor')
-    else: 
-    	set_measurement_service(session, s_list[3], s_list[2], 'indoor')
+        set_measurement_service(session, s_list[3], s_list[2], 'outdoor')
+    else:
+        set_measurement_service(session, s_list[3], s_list[2], 'indoor')
+
 
 def set_measurement_service(session, temperature, humidity, location):
     """
@@ -45,3 +47,13 @@ def get_measurement_service(session, location):
     return list(
         map(lambda result: {'date': str(result.date), 'temperature': result.temperature, 'humidity': result.humidity},
             results))
+
+
+def get_latest_measurement(session, location):
+    measurement = session.query(Measurement) \
+        .filter_by(location=location) \
+        .order_by(Measurement.time.desc()) \
+        .limit(1) \
+        .one_or_none()
+
+    return measurement.to_dict()
