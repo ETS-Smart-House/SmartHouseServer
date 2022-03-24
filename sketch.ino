@@ -101,6 +101,7 @@ void StringParse(char* str)
       Serial.print(sID);
       Serial.print(" ");
       Serial.print(sIN);
+      break;
     default:
       Serial.println("\nERROR PARSING");
 
