@@ -1,6 +1,13 @@
 from sqlalchemy import func
 
 from db.models.measurements import Measurement
+from services.comm import send_command
+from services.comm import input_command
+
+def request_mesurment(ID, mode=0):
+    send_command("RS", ID,  mode)
+    in_string = input_command().decode('utf-8')
+    print(in_string)
 
 
 def set_measurement_service(session, temperature, humidity, location):

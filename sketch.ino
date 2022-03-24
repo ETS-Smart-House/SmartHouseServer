@@ -77,30 +77,15 @@ void StringParse(char* str)
   {
     case 0:
       LightControll(atoi(sID), atoi(sIN));
-      Serial.print("\nLIGHTS ");
-      Serial.print(sID);
-      Serial.print(" ");
-      Serial.println(sIN);
       break;
     case 1:
       HeaterRelay(atoi(sID), atoi(sIN));
-      Serial.print("\nHEAT ");
-      Serial.print(sID);
-      Serial.print(" ");
-      Serial.println(sIN);
       break;
     case 2:
-      Serial.print("\nPUMP ");
-      Serial.print(sID);
-      Serial.print(" ");
-      Serial.println(sIN);
+      PumpControll(atoi(sID), atoi(sIN));
       break;
     case 3:
       RequestSensReadings(atoi(sID), atoi(sIN));
-      Serial.print("\nSENSOR REQUEST ");
-      Serial.print(sID);
-      Serial.print(" ");
-      Serial.print(sIN);
       break;
     default:
       Serial.println("\nERROR PARSING");
@@ -121,14 +106,23 @@ void RequestSensReadings(int sensorID, bool mode)
 
 }
 
+void PumpControll(int id, bool state)
+{
+    if(id == 0)
+        ServoControll(servo0, state)
+    else if(id == 1)
+    	ServoControll(servo1, state)
+    
+}
+
 void ServoControll(Servo servo, bool state)
 {
-    int servoPos = 0;
+    int servoPos = 10;
     if(state)
     {
-      for (servoPos = 10; servoPos <= 160; servoPos += 1) 
+      for (servoPos = 10; servoPos <= 45; servoPos += 1) 
         servo.write(servoPos);              
-      for (servoPos = 160; servoPos >= 10; servoPos -= 1) 
+      for (servoPos = 45; servoPos >= 10; servoPos -= 1) 
         servo.write(servoPos);                
     }
     else
@@ -212,6 +206,8 @@ void setup()
   servo1.attach(PPIN1);
 
   dht0.begin();
+  dht1.begin();
+  dht2.begin();
 
   Serial.begin(115200);
   
