@@ -69,8 +69,10 @@ void StringParse(char* str)
     lookup = 1;
   else if(strcmp(com, "P") == 0)
     lookup = 2;
+  else if(strcmp(com, "RS")== 0)
+    lookup = 3;
   else
-    lookup = 3;  
+    lookup = 69;  
   switch(lookup)
   {
     case 0:
@@ -94,10 +96,27 @@ void StringParse(char* str)
       Serial.println(sIN);
       break;
     case 3:
+      RequestSensReadings(atoi(sID), atoi(sIN));
+      Serial.print("\nSENSOR REQUEST ");
+      Serial.print(sID);
+      Serial.print(" ");
+      Serial.print(sIN);
+    default:
       Serial.println("\nERROR PARSING");
-      break;
+
       
   }
+
+}
+
+void RequestSensReadings(int sensorID, bool mode)
+{
+  if(sensorID==0)
+    DHTRead(dht0, sensorID, mode);
+  else if(sensorID==1)
+    DHTRead(dht1, sensorID, mode);
+  else if(sensorID==2)
+    DHTRead(dht2, sensorID, mode);
 
 }
 
@@ -126,29 +145,31 @@ void HeaterRelay(int pin, bool state)
   digitalWrite(pin, state);
 }
 
-void DHTRead(DHT dht, int ID)
+void DHTRead(DHT dht, int ID, bool mode)
 {
   char hOut[64];
   char tOut[64];
 
   float hTemp = dht.readHumidity();
   float tTemp = dht.readTemperature();
-
-  strcpy(hOut, "DHTH-");
-  strcat(hOut, String(ID).c_str());
-  strcat(hOut, "-");
-  strcat(hOut, String(hTemp).c_str());
-
-  strcpy(tOut, "DHTT-");
-  strcat(tOut, String(ID).c_str());
-  strcat(tOut, "-");
-  strcat(tOut, String(tTemp).c_str());
-
-  
-  Serial.print(hOut);
-  Serial.print("\n");
-  Serial.print(tOut);
-  Serial.print("\n");
+  if(mode)
+  {
+    strcpy(hOut, "DHTH-");
+    strcat(hOut, String(ID).c_str());
+    strcat(hOut, "-");
+    strcat(hOut, String(hTemp).c_str());
+    Serial.print(hOut);
+    Serial.print("\n");
+  }
+  else
+  { 
+    strcpy(tOut, "DHTT-");
+    strcat(tOut, String(ID).c_str());
+    strcat(tOut, "-");
+    strcat(tOut, String(tTemp).c_str());
+    Serial.print(tOut);
+    Serial.print("\n");
+  }
 }
 
 void DTRead(DallasTemperature dTSens, int ID)
@@ -214,18 +235,15 @@ void loop()
   else
   {
     if((usTemp2+usTemp1)<20)
+    {
       digitalWrite(LPIN0, HIGH);
+      tempTime = millis();
+    }
   }
   switchin = !switchin;
   
   if(millis() - tempTime > 10000)
   {
-    DHTRead(dht0, 0);
-    DHTRead(dht1, 1);
-    DHTRead(dht2, 2);
-
-    DTRead(dTSens0, 0);
-
     digitalWrite(LPIN0, LOW);
     
     tempTime = millis();
