@@ -15,9 +15,9 @@ def request_mesurment(ID):
     if s_list[1] == '0':
         set_measurement_service(session, s_list[3], s_list[2], 'outdoor')
     elif s_list[1] == '1':
-        set_measurement_service(session, s_list[3], s_list[2], 'floor1')
+        set_measurement_service(session, s_list[3], s_list[2], 'indoor')
     elif s_list[1] == '2':
-    	set_measurement_service(session, s_list[3], s_list[2], 'floor2')
+        set_measurement_service(session, s_list[3], s_list[2], 'indoor')
 
 
 def set_measurement_service(session, temperature, humidity, location):
@@ -25,7 +25,7 @@ def set_measurement_service(session, temperature, humidity, location):
     :param session:
     :param temperature: Float
     :param humidity: Float
-    :param location: ENUM('floor1', 'floor2' , 'outdoor')
+    :param location: ENUM('indoor' , 'outdoor')
     :return:
     """
     measurement = Measurement()
@@ -44,6 +44,7 @@ def get_measurement_service(session, location):
         .with_entities(func.date(Measurement.time).label('date'),
                        func.round(func.avg(Measurement.temperature), 0).label('temperature'),
                        func.round(func.avg(Measurement.humidity), 0).label('humidity')) \
+        .order_by(func.date(Measurement.time).desc()) \
         .group_by(func.date(Measurement.time)).all()
 
     return list(

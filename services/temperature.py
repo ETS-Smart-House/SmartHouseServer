@@ -8,6 +8,7 @@ from db.models.temperature import Temperature, TemperaturePeriod
 from services.measurements import get_latest_measurement
 from services.comm import send_command
 
+
 def manage_temperature():
     floor1 = get_latest_measurement(session, "floor1")
     floor2 = get_latest_measurement(session, "floor2")
@@ -20,15 +21,15 @@ def manage_temperature():
     print("target temp: " + str(targetTemp1))
     print("target temp: " + str(targetTemp2))
     if temp1 < targetTemp1:
-    	send_command("P", 0, 1)
+        send_command("P", 0, 1)
     else:
-    	send_command("P", 0, 0)
+        send_command("P", 0, 0)
     sleep(0.1)
     if temp2 < targetTemp2:
-    	send_command("P", 1, 1)
+        send_command("P", 1, 1)
     else:
-    	send_command("P", 1, 0)
-    
+        send_command("P", 1, 0)
+
 
 def set_temperature_service(session, payload):
     response = []

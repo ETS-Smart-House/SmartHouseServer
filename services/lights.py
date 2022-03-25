@@ -1,10 +1,4 @@
-from db.models.light import Light
 from services.comm import send_command
-from services.comm import input_command
-from db.connection import session
-
-from services.temperature import manage_temperature
-
 
 lights = {}
 
